@@ -5,34 +5,34 @@ someone else had the same discovery here:
 
 # network connection
 
- the virtualbox based setup i used:
+    the virtualbox based setup i used:
 
-   inet 
-     |
-     |   eth0|---------|   virtualized    |---------|
-     \ ------|  host   |------------------|  guest  |
-             |---------| vboxnet0    eth1 |---------|
-                                       |
-                                     inside the guest
-                                      this interface is called eth1
-                                        
+      inet 
+        |
+        |   eth0|---------|   virtualized    |---------|
+        \ ------|  host   |------------------|  guest  |
+                |---------| vboxnet0    eth1 |---------|
+                          |
+                        inside the guest
+                          this interface is called eth1
+                        
   
 # working condition 
 when the network connection is working properly i can see:
-	  guest % ./qt-QNetworkAccessManager-issues
-	  NetGet about to do lookupHost 
-	  lookupHost ID =  1 
-	  NetGet now invoking quit() at QCoreApplication::instance() 
-	  ------------------------------------------------------------------------------------------
-	    type the letter 'q' and hit RETURN to run quit(
-	  ------------------------------------------------------------------------------------------
-	  
-	  --------------------------------------------
-	  printResults (QHostAddress("87.238.53.172") )  
-	  -------------------------------------------- 
-	  canceling lookupHost ID =  1 
-	  ~NetGet 
-	  ./qt-QNetworkAccessManager-issues  0.00s user 0.01s system 6% cpu 0.177 total
+      guest % ./qt-QNetworkAccessManager-issues
+      NetGet about to do lookupHost 
+      lookupHost ID =  1 
+      NetGet now invoking quit() at QCoreApplication::instance() 
+      ------------------------------------------------------------------------------------------
+        type the letter 'q' and hit RETURN to run quit(
+      ------------------------------------------------------------------------------------------
+      
+      --------------------------------------------
+      printResults (QHostAddress("87.238.53.172") )  
+      -------------------------------------------- 
+      canceling lookupHost ID =  1 
+      ~NetGet 
+      ./qt-QNetworkAccessManager-issues  0.00s user 0.01s system 6% cpu 0.177 total
 
 
 # error condition
@@ -42,20 +42,20 @@ you have your test machine connected to.
 
 in this example it took me about 70ms to press q + RETURN, see:
 
-	guest % time ./qt-QNetworkAccessManager-issues
-	NetGet about to do lookupHost 
-	lookupHost ID =  1 
-	NetGet now invoking quit() at QCoreApplication::instance() 
-	------------------------------------------------------------------------------------------
-	  type the letter 'q' and hit RETURN to run quit(
-	------------------------------------------------------------------------------------------
-	
-	q
-	you typed:  "q" 
-	input handling exited, program should quit in less than a second! 
-	canceling lookupHost ID =  1 
-	~NetGet 
-	./qt-QNetworkAccessManager-issues  0.02s user 0.00s system 0% cpu 40.070 total
+    guest % time ./qt-QNetworkAccessManager-issues
+    NetGet about to do lookupHost 
+    lookupHost ID =  1 
+    NetGet now invoking quit() at QCoreApplication::instance() 
+    ------------------------------------------------------------------------------------------
+      type the letter 'q' and hit RETURN to run quit(
+    ------------------------------------------------------------------------------------------
+    
+    q
+    you typed:  "q" 
+    input handling exited, program should quit in less than a second! 
+    canceling lookupHost ID =  1 
+    ~NetGet 
+    ./qt-QNetworkAccessManager-issues  0.02s user 0.00s system 0% cpu 40.070 total
 
 still i had to wait 40.070 seconds until the DNS hit a timeout!
              
@@ -63,26 +63,26 @@ still i had to wait 40.070 seconds until the DNS hit a timeout!
 
 this means, if i ping 8.8.8.8 from the guest, it will send these packages but they will end in nirvana:
 
-	guest % ping 8.8.8.8
-	PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
-	From 192.168.56.101 icmp_seq=1 Destination Host Unreachable
-	From 192.168.56.101 icmp_seq=2 Destination Host Unreachable
-	From 192.168.56.101 icmp_seq=3 Destination Host Unreachable
-	From 192.168.56.101 icmp_seq=4 Destination Host Unreachable
-	From 192.168.56.101 icmp_seq=5 Destination Host Unreachable
-	...
+    guest % ping 8.8.8.8
+    PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+    From 192.168.56.101 icmp_seq=1 Destination Host Unreachable
+    From 192.168.56.101 icmp_seq=2 Destination Host Unreachable
+    From 192.168.56.101 icmp_seq=3 Destination Host Unreachable
+    From 192.168.56.101 icmp_seq=4 Destination Host Unreachable
+    From 192.168.56.101 icmp_seq=5 Destination Host Unreachable
+    ...
 
 
-	guest % ip a
-	3: eth1: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc pfifo_fast state DOWN qlen 1000
-	    link/ether 08:00:27:09:8c:39 brd ff:ff:ff:ff:ff:ff
-	    inet 192.168.56.101/24 brd 192.168.56.255 scope global eth1
-	    inet6 fe80::a00:27ff:fe09:8c39/64 scope link 
-	      valid_lft forever preferred_lft forever
+    guest % ip a
+    3: eth1: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc pfifo_fast state DOWN qlen 1000
+        link/ether 08:00:27:09:8c:39 brd ff:ff:ff:ff:ff:ff
+        inet 192.168.56.101/24 brd 192.168.56.255 scope global eth1
+        inet6 fe80::a00:27ff:fe09:8c39/64 scope link 
+          valid_lft forever preferred_lft forever
 
-	guest % ip r 
-	default via 192.168.56.1 dev eth1 
-	192.168.56.0/24 dev eth1  proto kernel  scope link  src 192.168.56.101 
+    guest % ip r 
+    default via 192.168.56.1 dev eth1 
+    192.168.56.0/24 dev eth1  proto kernel  scope link  src 192.168.56.101 
 
   
 # what causes the stall?
