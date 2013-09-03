@@ -1,7 +1,7 @@
 # related issues
 someone else had the same discovery here:
-  https://qt-project.org/forums/viewthread/11763
-  http://www.qtcentre.org/threads/41649-QNetworkAccessManager-smart-handling-of-timeouts-network-errors
+ - https://qt-project.org/forums/viewthread/11763
+ - http://www.qtcentre.org/threads/41649-QNetworkAccessManager-smart-handling-of-timeouts-network-errors
 
 # network connection
 
@@ -19,6 +19,7 @@ someone else had the same discovery here:
   
 # working condition 
 when the network connection is working properly i can see:
+
       guest % ./qt-QNetworkAccessManager-issues
       NetGet about to do lookupHost 
       lookupHost ID =  1 
