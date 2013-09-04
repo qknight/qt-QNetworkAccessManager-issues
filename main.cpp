@@ -22,6 +22,8 @@ int main(int argc, char *argv[])
     QObject::connect(workerThread1, SIGNAL(started()), &stdinthread, SLOT(doWork()));
     QObject::connect(workerThread1, SIGNAL(finished()), &stdinthread, SLOT(deleteLater()));
 
+    QObject::connect(&stdinthread, SIGNAL(myquit()), &ng, SLOT(myQuit()));
+    
     stdinthread.moveToThread(workerThread1);
 
     workerThread1->start();

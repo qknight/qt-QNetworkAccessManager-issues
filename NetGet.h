@@ -22,6 +22,7 @@ private:
     int info;
 private slots:
     void printResults(QHostInfo h);
+    void myQuit();
 };
 
 #endif

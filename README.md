@@ -1,8 +1,10 @@
 # related issues
 someone else had the same discovery here:
- - https://qt-project.org/forums/viewthread/11763
- - http://www.qtcentre.org/threads/41649-QNetworkAccessManager-smart-handling-of-timeouts-network-errors
-
+  [x] https://qt-project.org/forums/viewthread/11763
+  [ ] http://www.qtcentre.org/threads/41649-QNetworkAccessManager-smart-handling-of-timeouts-network-errors
+   ^
+   \--- notified the thread owners of my minimal example 
+   
 # network connection
 
     the virtualbox based setup i used:
@@ -16,10 +18,15 @@ someone else had the same discovery here:
                         inside the guest
                           this interface is called eth1
                         
+                        
+## a similar setup without virtualization would be:
+host pc ---- switch1 ---- switch2 ----- internet 
+
+and then unplug switch2 so that networkmanager/ifplugd (or similar) on the host won't notice that the cable has been unplugged.
+
   
 # working condition 
 when the network connection is working properly i can see:
-
       guest % ./qt-QNetworkAccessManager-issues
       NetGet about to do lookupHost 
       lookupHost ID =  1 
@@ -40,6 +47,9 @@ when the network connection is working properly i can see:
 when i unplug the network cable (host::eth0), the virtualbox guest can't detect it. this behaviour is not specific
 to virtualization and affects all similar setups. for example if you unplug the network cable between your router to the switch
 you have your test machine connected to.
+
+NOTE: beware of dhcp issues, check that your network adapter still has a valid lease or use
+      statically configured addresses instead. 
 
 in this example it took me about 70ms to press q + RETURN, see:
 
@@ -96,8 +106,58 @@ and there is no resolver running on localhost i get an immediate timeout instead
 since the function call 'QHostInfo::abortHostLookup ( info )' in ~NetGet() is not working, maybe this is also the issue its
 usage in QNetworkAccessManager?
     
-# possible solutions
-- find out why the function call 'QHostInfo::abortHostLookup ( info )' in ~NetGet() is not working
+## iptables
+iptables -D OUTPUT -d 8.8.8.8 -j DROP    
+or
+iptables -D OUTPUT -p udp -d 8.8.8.8 -j DROP
+    
+on the host running ./qt-QNetworkAccessManager-issues does NOT have the same effect than unplugging the cable!    
+	  guest % cat /etc/resolv.conf
+	  nameserver 8.8.8.8
+
+
+	  guest % iptables -D OUTPUT -p udp -d 8.8.8.8 -j DROP
+
+	  
+	  guest % ./qt-QNetworkAccessManager-issues
+	  make: Nothing to be done for `first'.
+	  NetGet about to do lookupHost 
+	  lookupHost ID =  1 
+	  NetGet now invoking quit() at QCoreApplication::instance() 
+	  ------------------------------------------------------------------------------------------
+	    type the letter 'q' and hit RETURN to run quit(
+	  ------------------------------------------------------------------------------------------
+	  --------------------------------------------
+	  printResults () 
+	  -------------------------------------------- 
+	  canceling lookupHost ID =  1 
+	  ~NetGet 
+
+	  
+	  guest % ping 8.8.8.8
+	  PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+	  ping: sendmsg: Operation not permitted
+	  ping: sendmsg: Operation not permitted
+	  ping: sendmsg: Operation not permitted
+	  ^C
+	  --- 8.8.8.8 ping statistics ---
+	  3 packets transmitted, 0 received, 100% packet loss, time 2017ms
+   
+NOTE: interestingly it makes the situation even better, since if you unplug the cable now it instantly terminates anyway!    
+    
+# discussion 
+
+## what should have happened
+since i want to shutdown the program ASAP it is not important to wait for the DNS query. there might
+be other usecases though, for example anki (ankiweb.net) does a final sync before it is closed. however, i guess 
+that most of the time ppl do not want to wait on shutdown.
+
+IMHO the lookupHost should be actively canceled by the destructor of the class
+
+## possible solutions
+- find out why the function call 'QHostInfo::abortHostLookup ( info )' in ~NetGet() is not working always
+  -> i think this is a bug!
+
 - check if QNetworkAccessManager is affected by the same issue, if not
 - consider using 'QHostInfo::abortHostLookup ( x )' for all running requests
 

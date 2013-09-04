@@ -20,7 +20,7 @@ void stdinThread::doWork() {
         qDebug() << "you typed: " << s;
 
         if (s == "q") {
-            QCoreApplication::instance()->quit();
+            emit myquit();
             break;
         }
     }

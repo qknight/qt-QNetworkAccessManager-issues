@@ -12,7 +12,6 @@ public slots:
     void doWork();
 signals:
     void myquit();
-    void mycancel();
 };
 
 #endif
